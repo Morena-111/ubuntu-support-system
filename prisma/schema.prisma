@@ -11,3 +11,230 @@ generator client {
 datasource db {
   provider = "postgresql"
 }
+
+enum Role {
+  ADMIN
+  DONOR
+  BENEFICIARY
+  VOLUNTEER
+}
+
+enum OrganisationType {
+  COMPANY
+  NGO
+  SCHOOL
+  COMMUNITY
+}
+
+enum RequestCategory {
+  FOOD
+  CLOTHING
+  EDUCATION
+  HEALTH
+  FURNITURE
+  TECHNOLOGY
+  OTHER
+}
+
+enum RequestStatus {
+  PENDING
+  APPROVED
+  MATCHED
+  REJECTED
+  COMPLETED
+}
+
+enum DonationStatus {
+  PENDING
+  COLLECTED
+  IN_TRANSIT
+  DELIVERED
+  CANCELLED
+}
+
+enum VolunteerStatus {
+  ASSIGNED
+  IN_TRANSIT
+  DELIVERED
+}
+
+enum CampaignStatus {
+  ACTIVE
+  COMPLETED
+  CANCELLED
+}
+
+model Organisation {
+  id               String           @id @default(uuid())
+  name             String
+  organisationType OrganisationType
+
+  email    String  @unique
+  phone    String?
+  address  String?
+  city     String?
+  province String?
+  website  String?
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users User[]
+}
+
+model User {
+  id String @id @default(uuid())
+
+  firstName String
+  lastName  String
+
+  email    String @unique
+  password String
+
+  phone        String?
+  profileImage String?
+
+  role Role
+
+  organisationId String?
+  organisation   Organisation? @relation(fields: [organisationId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  donationRequests DonationRequest[]
+  donations        Donation[]
+  notifications    Notification[]
+  activityLogs     ActivityLog[]
+  assignments      VolunteerAssignment[]
+  fileUploads      FileUpload[]
+}
+
+model DonationRequest {
+  id String @id @default(uuid())
+
+  title       String
+  description String
+
+  category RequestCategory
+  status   RequestStatus   @default(PENDING)
+
+  quantityNeeded Int
+
+  beneficiaryId String
+  beneficiary   User   @relation(fields: [beneficiaryId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  donations   Donation[]
+  fileUploads FileUpload[]
+}
+
+model Donation {
+  id String @id @default(uuid())
+
+  quantityDonated Int
+
+  status DonationStatus @default(PENDING)
+
+  donorId String
+  donor   User   @relation(fields: [donorId], references: [id])
+
+  requestId String
+  request   DonationRequest @relation(fields: [requestId], references: [id])
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  assignment VolunteerAssignment?
+}
+
+model VolunteerAssignment {
+  id String @id @default(uuid())
+
+  donationId String   @unique
+  donation   Donation @relation(fields: [donationId], references: [id])
+
+  volunteerId String
+  volunteer   User   @relation(fields: [volunteerId], references: [id])
+
+  status VolunteerStatus @default(ASSIGNED)
+
+  pickupDate   DateTime?
+  deliveryDate DateTime?
+
+  createdAt DateTime @default(now())
+}
+
+model Campaign {
+  id String @id @default(uuid())
+
+  title       String
+  description String?
+
+  startDate DateTime
+  endDate   DateTime?
+
+  status CampaignStatus @default(ACTIVE)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  impactReports ImpactReport[]
+}
+
+model Notification {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  title   String
+  message String
+  isRead  Boolean @default(false)
+
+  createdAt DateTime @default(now())
+}
+
+model ActivityLog {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  action   String
+  entity   String
+  entityId String?
+
+  timestamp DateTime @default(now())
+}
+
+model ImpactReport {
+  id String @id @default(uuid())
+
+  campaignId String
+  campaign   Campaign @relation(fields: [campaignId], references: [id])
+
+  beneficiariesSupported Int
+  donationsReceived      Int
+  volunteersInvolved     Int
+
+  reportDate DateTime @default(now())
+}
+
+model FileUpload {
+  id String @id @default(uuid())
+
+  userId String
+  user   User   @relation(fields: [userId], references: [id])
+
+  requestId String?
+  request   DonationRequest? @relation(fields: [requestId], references: [id])
+
+  fileName String
+  fileType String
+  filePath String
+
+  uploadedAt DateTime @default(now())
+}
