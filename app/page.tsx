@@ -1,4 +1,7 @@
 import Link from "next/link";
+import { connection } from "next/server";
+import { Role } from "@/app/generated/prisma/enums";
+import { prisma } from "@/lib/prisma";
 import Navbar from "../components/layout/Navbar";
 
 const features = [
@@ -22,14 +25,25 @@ const features = [
   },
 ];
 
-const stats = [
-  ["120+", "Support requests"],
-  ["340+", "Donations coordinated"],
-  ["85+", "Active volunteers"],
-  ["25+", "Communities reached"],
-];
+export default async function Home() {
+  await connection();
 
-export default function Home() {
+  const [requestCount, donationCount, volunteerCount, impact] =
+    await Promise.all([
+      prisma.donationRequest.count(),
+      prisma.donation.count(),
+      prisma.user.count({ where: { role: Role.VOLUNTEER } }),
+      prisma.impactReport.aggregate({
+        _sum: { beneficiariesSupported: true },
+      }),
+    ]);
+  const stats = [
+    [requestCount, "Support requests"],
+    [donationCount, "Donations coordinated"],
+    [volunteerCount, "Registered volunteers"],
+    [impact._sum.beneficiariesSupported ?? 0, "Beneficiaries supported"],
+  ];
+
   return (
     <main className="min-h-screen bg-white">
       <Navbar />

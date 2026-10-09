@@ -1,4 +1,5 @@
 import Link from "next/link";
+import { signOut } from "@/auth";
 
 const navigation = [
   { name: "Overview", href: "/dashboard" },
@@ -41,6 +42,20 @@ export default function Sidebar() {
           <p className="mt-1 text-xs text-slate-500">
             Next.js implementation
           </p>
+          <form
+            action={async () => {
+              "use server";
+              await signOut({ redirectTo: "/login" });
+            }}
+            className="mt-4"
+          >
+            <button
+              type="submit"
+              className="w-full rounded-lg border border-slate-700 px-4 py-2.5 text-left text-sm font-medium text-slate-300 transition hover:border-slate-600 hover:bg-slate-900 hover:text-white"
+            >
+              Sign out
+            </button>
+          </form>
         </div>
       </div>
     </aside>
