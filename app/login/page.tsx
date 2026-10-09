@@ -4,6 +4,7 @@ import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import Navbar from "@/components/layout/Navbar";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -35,15 +36,9 @@ export default function LoginPage() {
 
   return (
     <main className="min-h-screen bg-slate-950">
-      <div className="mx-auto grid min-h-screen max-w-7xl lg:grid-cols-2">
+      <Navbar />
+      <div className="mx-auto grid min-h-[calc(100vh-81px)] max-w-7xl lg:grid-cols-2">
         <div className="hidden flex-col justify-between p-12 lg:flex">
-          <Link href="/" className="flex items-center gap-3 text-white">
-            <div className="flex h-10 w-10 items-center justify-center rounded-xl bg-orange-500 font-bold">
-              U
-            </div>
-            <span className="font-bold">Ubuntu Support</span>
-          </Link>
-
           <div>
             <p className="text-sm font-semibold uppercase tracking-widest text-orange-400">
               Welcome back
@@ -66,15 +61,6 @@ export default function LoginPage() {
 
         <div className="flex items-center justify-center bg-slate-50 px-6 py-12">
           <div className="w-full max-w-md">
-            <div className="mb-8 lg:hidden">
-              <Link
-                href="/"
-                className="text-xl font-bold text-slate-950"
-              >
-                Ubuntu Support
-              </Link>
-            </div>
-
             <div className="rounded-3xl border bg-white p-8 shadow-sm md:p-10">
               <p className="text-sm font-semibold text-orange-500">
                 Account access
@@ -150,7 +136,7 @@ export default function LoginPage() {
               </form>
 
               <p className="mt-8 text-center text-sm text-slate-500">
-                Don't have an account?{" "}
+                Don&apos;t have an account?{" "}
                 <Link
                   href="/register"
                   className="font-semibold text-orange-500"
